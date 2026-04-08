@@ -5,6 +5,7 @@ parameters:
         - tests
     parallel:
         maximumNumberOfProcesses: 1
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\)#'
         - '#Cannot call method .+Node\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null#'
