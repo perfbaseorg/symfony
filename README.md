@@ -1,4 +1,21 @@
-# Perfbase for Symfony
+<p align="center">
+  <a href="https://perfbase.com">
+    <img src="https://cdn.perfbase.com/img/logo-full.svg" alt="Perfbase" width="300">
+  </a>
+</p>
+
+<h3 align="center">Perfbase for Symfony</h3>
+<p align="center">
+  Symfony integration for <a href="https://perfbase.com">Perfbase</a>.
+</p>
+
+<p align="center">
+  <a href="https://packagist.org/packages/perfbase/symfony"><img src="https://img.shields.io/packagist/v/perfbase/symfony" alt="Packagist Version"></a>
+  <a href="https://github.com/perfbaseorg/symfony/blob/main/LICENSE.txt"><img src="https://img.shields.io/packagist/l/perfbase/symfony" alt="License"></a>
+  <a href="https://github.com/perfbaseorg/symfony/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/perfbaseorg/symfony/ci.yml?branch=main" alt="CI"></a>
+  <img src="https://img.shields.io/badge/php-7.4%2B-blue" alt="PHP Version">
+  <img src="https://img.shields.io/badge/symfony-5.4--7.x-blue" alt="Symfony Version">
+</p>
 
 `perfbase/symfony` is the official Symfony bundle for Perfbase.
 
@@ -401,12 +418,14 @@ composer run phpstan
 php fixture-app/smoke.php
 ```
 
-## Support Statement
+## Documentation
 
-This package is production-ready for its current v1 scope:
+Full documentation is available at [perfbase.com/docs](https://perfbase.com/docs).
 
-- HTTP request profiling
-- Console command profiling
+- **Docs**: [perfbase.com/docs](https://perfbase.com/docs)
+- **Issues**: [github.com/perfbaseorg/symfony/issues](https://github.com/perfbaseorg/symfony/issues)
+- **Support**: [support@perfbase.com](mailto:support@perfbase.com)
 
-It should not yet be described as complete instrumentation for every Symfony
-runtime surface.
+## License
+
+Apache-2.0. See [LICENSE.txt](LICENSE.txt).
