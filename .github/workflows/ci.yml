@@ -38,8 +38,11 @@ jobs:
       - name: Install Perfbase extension
         run: bash -c "$(curl -fsSL https://cdn.perfbase.com/install.sh)"
 
+      - name: Pin Symfony version
+        run: composer require --no-update symfony/config:${{ matrix.symfony-version }} symfony/console:${{ matrix.symfony-version }} symfony/dependency-injection:${{ matrix.symfony-version }} symfony/event-dispatcher:${{ matrix.symfony-version }} symfony/framework-bundle:${{ matrix.symfony-version }} symfony/http-kernel:${{ matrix.symfony-version }} symfony/routing:${{ matrix.symfony-version }} symfony/security-core:${{ matrix.symfony-version }}
+
       - name: Install dependencies
-        run: composer update --with-all-dependencies --prefer-dist --no-progress ${{ matrix.prefer-lowest && '--prefer-lowest' || '' }} symfony/config:${{ matrix.symfony-version }} symfony/console:${{ matrix.symfony-version }} symfony/dependency-injection:${{ matrix.symfony-version }} symfony/event-dispatcher:${{ matrix.symfony-version }} symfony/framework-bundle:${{ matrix.symfony-version }} symfony/http-kernel:${{ matrix.symfony-version }} symfony/routing:${{ matrix.symfony-version }} symfony/security-core:${{ matrix.symfony-version }}
+        run: composer update --with-all-dependencies --prefer-dist --no-progress ${{ matrix.prefer-lowest && '--prefer-lowest' || '' }}
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G
