@@ -1,0 +1,65 @@
+{
+  "name": "perfbase/symfony",
+  "description": "Symfony integration for the Perfbase profiling tool.",
+  "keywords": [
+    "Perfbase",
+    "symfony",
+    "profiling",
+    "apm",
+    "monitoring"
+  ],
+  "homepage": "https://github.com/perfbaseorg/symfony",
+  "support": {
+    "issues": "https://github.com/perfbaseorg/symfony/issues",
+    "source": "https://github.com/perfbaseorg/symfony"
+  },
+  "type": "library",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Ben Poulson",
+      "email": "ben.poulson@perfbase.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4 <8.5",
+    "perfbase/php-sdk": "^1.0",
+    "symfony/config": "^5.4|^6.0|^7.0",
+    "symfony/console": "^5.4|^6.0|^7.0",
+    "symfony/dependency-injection": "^5.4|^6.0|^7.0",
+    "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
+    "symfony/framework-bundle": "^5.4|^6.0|^7.0",
+    "symfony/http-kernel": "^5.4|^6.0|^7.0",
+    "symfony/routing": "^5.4|^6.0|^7.0",
+    "symfony/security-core": "^5.4|^6.0|^7.0"
+  },
+  "require-dev": {
+    "mockery/mockery": "^1.6",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^9"
+  },
+  "autoload": {
+    "psr-4": {
+      "Perfbase\\Symfony\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Perfbase\\Symfony\\Tests\\": "tests/",
+      "Perfbase\\Symfony\\FixtureApp\\": "fixture-app/src/"
+    }
+  },
+  "scripts": {
+    "lint": "composer run-script phpstan && composer run-script test",
+    "test": "phpunit",
+    "phpstan": "phpstan analyse --memory-limit=2G --debug"
+  },
+  "extra": {
+    "symfony": {
+      "bundle": "Perfbase\\Symfony\\PerfbaseBundle"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

@@ -1,0 +1,71 @@
+name: PHP CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  php-tests:
+    name: PHPStan and PHPUnit on PHP ${{ matrix.php-version }} / Symfony ${{ matrix.symfony-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: '7.4'
+            symfony-version: '^5.4'
+            prefer-lowest: true
+          - php-version: '8.1'
+            symfony-version: '^6.4'
+            prefer-lowest: false
+          - php-version: '8.2'
+            symfony-version: '^7.0'
+            prefer-lowest: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer
+
+      - name: Install Perfbase extension
+        run: bash -c "$(curl -fsSL https://cdn.perfbase.com/install.sh)"
+
+      - name: Install dependencies
+        run: composer update --with-all-dependencies --prefer-dist --no-progress ${{ matrix.prefer-lowest && '--prefer-lowest' || '' }} symfony/config:${{ matrix.symfony-version }} symfony/console:${{ matrix.symfony-version }} symfony/dependency-injection:${{ matrix.symfony-version }} symfony/event-dispatcher:${{ matrix.symfony-version }} symfony/framework-bundle:${{ matrix.symfony-version }} symfony/http-kernel:${{ matrix.symfony-version }} symfony/routing:${{ matrix.symfony-version }} symfony/security-core:${{ matrix.symfony-version }}
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --coverage-text
+
+  smoke:
+    name: Fixture App Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Install Perfbase extension
+        run: bash -c "$(curl -fsSL https://cdn.perfbase.com/install.sh)"
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Boot fixture app
+        run: php fixture-app/smoke.php

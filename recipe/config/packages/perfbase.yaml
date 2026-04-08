@@ -1,0 +1,5 @@
+perfbase:
+  enabled: false
+  api_key: '%env(default::PERFBASE_API_KEY)%'
+  sample_rate: 0.1
+  app_version: '%env(default::PERFBASE_APP_VERSION)%'
