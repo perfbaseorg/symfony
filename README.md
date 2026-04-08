@@ -105,7 +105,7 @@ perfbase:
   debug: false
   log_errors: true
   api_key: ''
-  api_url: 'https://receiver.perfbase.com'
+  api_url: 'https://ingress.perfbase.cloud'
   sample_rate: 0.1
   timeout: 10
   proxy: null
@@ -127,7 +127,7 @@ perfbase:
 | `debug` | `bool` | `false` | Re-throws profiling errors instead of failing open |
 | `log_errors` | `bool` | `true` | Logs profiling errors when `debug=false` |
 | `api_key` | `string` | `''` | Perfbase project API key |
-| `api_url` | `string` | `https://receiver.perfbase.com` | Receiver base URL |
+| `api_url` | `string` | `https://ingress.perfbase.cloud` | Receiver base URL |
 | `sample_rate` | `float` | `0.1` | Sampling rate from `0.0` to `1.0` |
 | `timeout` | `int` | `10` | SDK submission timeout in seconds |
 | `proxy` | `string|null` | `null` | Optional outbound proxy URL |
@@ -168,7 +168,7 @@ perfbase:
   debug: false
   log_errors: true
   api_key: '%env(PERFBASE_API_KEY)%'
-  api_url: 'https://receiver.perfbase.com'
+  api_url: 'https://ingress.perfbase.cloud'
   sample_rate: 0.2
   timeout: 10
   flags: !php/const Perfbase\SDK\FeatureFlags::DefaultFlags

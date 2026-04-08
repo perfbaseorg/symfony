@@ -695,7 +695,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     debug?: bool|Param, // Default: false
  *     log_errors?: bool|Param, // Default: true
  *     api_key?: scalar|Param|null, // Default: ""
- *     api_url?: scalar|Param|null, // Default: "https://receiver.perfbase.com"
+ *     api_url?: scalar|Param|null, // Default: "https://ingress.perfbase.cloud"
  *     sample_rate?: float|Param, // Default: 0.1
  *     timeout?: int|Param, // Default: 10
  *     proxy?: scalar|Param|null, // Default: null

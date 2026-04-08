@@ -32,7 +32,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('api_key')->defaultValue('')->end()
             ->scalarNode('api_url')
                 ->cannotBeEmpty()
-                ->defaultValue('https://receiver.perfbase.com')
+                ->defaultValue('https://ingress.perfbase.cloud')
                 ->validate()
                     ->ifTrue(static function ($value): bool {
                         return !is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false;
