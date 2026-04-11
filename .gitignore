@@ -5,6 +5,8 @@
 /coverage/
 /coverage.xml
 /fixture-app/var/
+/config/reference.php
+/fixture-app/config/reference.php
 /.DS_Store
 /.idea/
 /.vscode/

@@ -50,7 +50,7 @@ class FakeRecordingPerfbaseClient extends Perfbase
         return $this->submitResult ?? SubmitResult::success();
     }
 
-    public function reset()
+    public function reset(): void
     {
     }
 
