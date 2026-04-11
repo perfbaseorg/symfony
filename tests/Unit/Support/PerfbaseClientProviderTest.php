@@ -11,6 +11,18 @@ use PHPUnit\Framework\TestCase;
 
 class PerfbaseClientProviderTest extends TestCase
 {
+    /**
+     * @return mixed
+     */
+    private function getConfigValue(\Perfbase\SDK\Config $config, string $propertyName)
+    {
+        $reflection = new \ReflectionClass($config);
+        $property = $reflection->getProperty($propertyName);
+        $property->setAccessible(true);
+
+        return $property->getValue($config);
+    }
+
     public function test_valid_config_returns_cached_client(): void
     {
         $created = 0;
@@ -49,8 +61,8 @@ class PerfbaseClientProviderTest extends TestCase
                 'proxy' => 'http://proxy.local:8080',
             ],
             new PerfbaseErrorHandler(false, false),
-            static function (\Perfbase\SDK\Config $config) use (&$capturedProxy) {
-                $capturedProxy = $config->getProxy();
+            function (\Perfbase\SDK\Config $config) use (&$capturedProxy) {
+                $capturedProxy = $this->getConfigValue($config, 'proxy');
                 return new RecordingPerfbaseClient();
             }
         );
@@ -97,10 +109,10 @@ class PerfbaseClientProviderTest extends TestCase
         $provider->getClient();
 
         self::assertInstanceOf(\Perfbase\SDK\Config::class, $capturedConfig);
-        self::assertSame('https://ingress.perfbase.cloud', $capturedConfig->getApiUrl());
-        self::assertSame(0, $capturedConfig->getFlags());
-        self::assertSame(10, $capturedConfig->getTimeout());
-        self::assertNull($capturedConfig->getProxy());
+        self::assertSame('https://ingress.perfbase.cloud', $this->getConfigValue($capturedConfig, 'api_url'));
+        self::assertSame(0, $this->getConfigValue($capturedConfig, 'flags'));
+        self::assertSame(10, $this->getConfigValue($capturedConfig, 'timeout'));
+        self::assertNull($this->getConfigValue($capturedConfig, 'proxy'));
     }
 
     public function test_default_factory_can_boot_real_sdk_client(): void
