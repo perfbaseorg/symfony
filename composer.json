@@ -22,7 +22,7 @@
     }
   ],
   "require": {
-    "php": ">=7.4 <8.5",
+    "php": ">=7.4 <8.6",
     "perfbase/php-sdk": "^1.0",
     "symfony/config": "^5.4|^6.0|^7.0",
     "symfony/console": "^5.4|^6.0|^7.0",

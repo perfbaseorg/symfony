@@ -13,7 +13,7 @@
   <a href="https://packagist.org/packages/perfbase/symfony"><img src="https://img.shields.io/packagist/v/perfbase/symfony" alt="Packagist Version"></a>
   <a href="https://github.com/perfbaseorg/symfony/blob/main/LICENSE.txt"><img src="https://img.shields.io/packagist/l/perfbase/symfony" alt="License"></a>
   <a href="https://github.com/perfbaseorg/symfony/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/perfbaseorg/symfony/ci.yml?branch=main" alt="CI"></a>
-  <img src="https://img.shields.io/badge/php-7.4%2B-blue" alt="PHP Version">
+  <img src="https://img.shields.io/badge/php-7.4--8.5-blue" alt="PHP Version">
   <img src="https://img.shields.io/badge/symfony-5.4--7.x-blue" alt="Symfony Version">
 </p>
 
@@ -40,7 +40,7 @@ Out of scope in the current release:
 
 ## Requirements
 
-- PHP `7.4` to `8.4`
+- PHP `7.4` to `8.5`
 - Symfony `5.4` to `7.x`
 - [`perfbase/php-sdk`](https://packagist.org/packages/perfbase/php-sdk) `^1.0`
 - The Perfbase native PHP extension installed and enabled
@@ -383,8 +383,9 @@ The package includes:
 - an install-level fixture app under [`fixture-app/`](fixture-app)
 - GitHub Actions CI for:
   - PHP `7.4` + Symfony `5.4`
-  - PHP `8.2` + Symfony `6.4`
-  - PHP `8.4` + Symfony `7.x`
+  - PHP `8.0` through `8.5` + Symfony `5.4`
+  - PHP `8.1` through `8.5` + Symfony `6.4`
+  - PHP `8.2` through `8.5` + Symfony `7.x`
   - fixture-app smoke verification
 
 Current coverage:
