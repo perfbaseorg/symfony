@@ -61,7 +61,7 @@ class HttpProfilerSubscriberTest extends TestCase
             'kernel.terminate'
         );
 
-        self::assertSame(['http.GET./articles/{id}'], $client->startedSpans);
+        self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /articles/{id}', $client->attributes['action']);
         self::assertSame('https://example.com/articles/42', $client->attributes['http_url']);
         self::assertSame('202', $client->attributes['http_status_code']);
@@ -96,7 +96,8 @@ class HttpProfilerSubscriberTest extends TestCase
 
         self::assertSame('missing', $client->attributes['exception']);
         self::assertSame('404', $client->attributes['http_status_code']);
-        self::assertSame(1, $client->submitCalls);
+        self::assertSame(0, $client->submitCalls);
+        self::assertSame(1, $client->resetCalls);
     }
 
     public function test_subrequest_is_ignored(): void
@@ -120,10 +121,77 @@ class HttpProfilerSubscriberTest extends TestCase
         self::assertSame(0, $client->submitCalls);
     }
 
-    private function bootKernel(): TestKernel
+    public function test_custom_allowed_status_code_is_submitted(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        TestPerfbaseClientProvider::$client = $client;
+
+        $kernel = $this->bootKernel([
+            'profile_http_status_codes' => [200, 404],
+        ]);
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        self::assertInstanceOf(EventDispatcherInterface::class, $dispatcher);
+
+        $request = Request::create('/missing', 'GET');
+        $request->attributes->set('_route', 'app_article');
+        $request->attributes->set('_controller', 'Perfbase\\Symfony\\Tests\\Fixtures\\TestController');
+
+        $dispatcher->dispatch(
+            new RequestEvent($kernel, $request, $this->mainRequestType()),
+            'kernel.request'
+        );
+        $dispatcher->dispatch(
+            new ResponseEvent($kernel, $request, $this->mainRequestType(), new Response('missing', 404)),
+            'kernel.response'
+        );
+        $dispatcher->dispatch(
+            new TerminateEvent($kernel, $request, new Response('missing', 404)),
+            'kernel.terminate'
+        );
+
+        self::assertSame('404', $client->attributes['http_status_code']);
+        self::assertSame(1, $client->submitCalls);
+        self::assertSame(0, $client->resetCalls);
+    }
+
+    public function test_server_error_status_code_is_submitted_by_default(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        TestPerfbaseClientProvider::$client = $client;
+
+        $kernel = $this->bootKernel();
+        $dispatcher = $kernel->getContainer()->get('event_dispatcher');
+        self::assertInstanceOf(EventDispatcherInterface::class, $dispatcher);
+
+        $request = Request::create('/explode', 'GET');
+        $request->attributes->set('_route', 'app_article');
+        $request->attributes->set('_controller', 'Perfbase\\Symfony\\Tests\\Fixtures\\TestController');
+
+        $dispatcher->dispatch(
+            new RequestEvent($kernel, $request, $this->mainRequestType()),
+            'kernel.request'
+        );
+        $dispatcher->dispatch(
+            new ResponseEvent($kernel, $request, $this->mainRequestType(), new Response('error', 500)),
+            'kernel.response'
+        );
+        $dispatcher->dispatch(
+            new TerminateEvent($kernel, $request, new Response('error', 500)),
+            'kernel.terminate'
+        );
+
+        self::assertSame('500', $client->attributes['http_status_code']);
+        self::assertSame(1, $client->submitCalls);
+        self::assertSame(0, $client->resetCalls);
+    }
+
+    /**
+     * @param array<string, mixed> $perfbaseConfig
+     */
+    private function bootKernel(array $perfbaseConfig = []): TestKernel
     {
         if ($this->kernel === null) {
-            $this->kernel = new TestKernel();
+            $this->kernel = new TestKernel($perfbaseConfig);
             $this->kernel->boot();
         }
 

@@ -26,6 +26,7 @@ class ConfigurationTest extends TestCase
 
         self::assertFalse($config['enabled']);
         self::assertSame(0.1, $config['sample_rate']);
+        self::assertSame(array_merge(range(200, 299), range(500, 599)), $config['profile_http_status_codes']);
         self::assertSame(['*'], $config['include']['http']);
         self::assertSame([], $config['exclude']['console']);
     }
@@ -37,6 +38,7 @@ class ConfigurationTest extends TestCase
             'enabled' => true,
             'api_key' => 'test-key',
             'sample_rate' => 1.0,
+            'profile_http_status_codes' => [200, 404],
             'include' => [
                 'http' => ['GET /health'],
                 'console' => ['app:*'],
@@ -45,6 +47,7 @@ class ConfigurationTest extends TestCase
 
         self::assertTrue($config['enabled']);
         self::assertSame('test-key', $config['api_key']);
+        self::assertSame([200, 404], $config['profile_http_status_codes']);
         self::assertSame(['GET /health'], $config['include']['http']);
         self::assertSame(['app:*'], $config['include']['console']);
     }
@@ -109,6 +112,16 @@ class ConfigurationTest extends TestCase
             'include' => [
                 'http' => [''],
             ],
+        ]]);
+    }
+
+    public function test_profile_http_status_codes_must_be_valid_http_status_codes(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $processor = new Processor();
+        $processor->processConfiguration(new Configuration(), [[
+            'profile_http_status_codes' => [99],
         ]]);
     }
 }

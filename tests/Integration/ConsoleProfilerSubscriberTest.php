@@ -46,7 +46,7 @@ class ConsoleProfilerSubscriberTest extends TestCase
         $dispatcher->dispatch(new ConsoleCommandEvent($command, $input, $output), 'console.command');
         $dispatcher->dispatch(new ConsoleTerminateEvent($command, $input, $output, 0), 'console.terminate');
 
-        self::assertSame(['console.app:sync'], $client->startedSpans);
+        self::assertSame(['cli'], $client->startedSpans);
         self::assertSame('0', $client->attributes['exit_code']);
         self::assertSame(1, $client->submitCalls);
     }

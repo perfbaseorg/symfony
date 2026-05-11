@@ -117,6 +117,10 @@ class PerfbaseClientProviderTest extends TestCase
 
     public function test_default_factory_can_boot_real_sdk_client(): void
     {
+        if (!extension_loaded('perfbase')) {
+            $this->markTestSkipped('Requires the native Perfbase extension to be loaded.');
+        }
+
         $provider = new PerfbaseClientProvider(
             [
                 'api_key' => 'test-key',

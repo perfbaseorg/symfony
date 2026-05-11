@@ -57,7 +57,7 @@ class HttpProfilerSubscriberTest extends TestCase
         $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
         $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('ok', 200)));
 
-        self::assertSame(['http.GET./raw/path'], $client->startedSpans);
+        self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /raw/path', $client->attributes['action']);
         self::assertSame('https://example.com/raw/path', $client->attributes['http_url']);
     }
@@ -77,7 +77,7 @@ class HttpProfilerSubscriberTest extends TestCase
         $subscriber->onException(new ExceptionEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST, new \RuntimeException('plain failure')));
         $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('boom', 500)));
 
-        self::assertSame(['http.GET.app_article'], $client->startedSpans);
+        self::assertSame(['http'], $client->startedSpans);
         self::assertSame('plain failure', $client->attributes['exception']);
         self::assertArrayNotHasKey('http_status_code', $client->attributes);
     }
@@ -95,18 +95,74 @@ class HttpProfilerSubscriberTest extends TestCase
         $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
         $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('ok', 200)));
 
-        self::assertSame(['http.GET.app_dashboard'], $client->startedSpans);
+        self::assertSame(['http'], $client->startedSpans);
     }
 
-    private function makeSubscriber(RecordingPerfbaseClient $client, ?RouterInterface $router = null): HttpProfilerSubscriber
+    public function test_not_found_exception_is_not_submitted_by_default(): void
     {
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client);
+        $request = Request::create('/missing', 'GET');
+
+        $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
+        $subscriber->onResponse(new ResponseEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST, new Response('missing', 404)));
+        $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('missing', 404)));
+
+        self::assertSame('404', $client->attributes['http_status_code']);
+        self::assertSame(0, $client->submitCalls);
+        self::assertSame(1, $client->resetCalls);
+    }
+
+    public function test_custom_allowed_status_code_is_submitted(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client, null, [
+            'profile_http_status_codes' => [200, 404],
+        ]);
+        $request = Request::create('/missing', 'GET');
+
+        $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
+        $subscriber->onResponse(new ResponseEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST, new Response('missing', 404)));
+        $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('missing', 404)));
+
+        self::assertSame(1, $client->submitCalls);
+        self::assertSame(0, $client->resetCalls);
+    }
+
+    public function test_server_error_status_code_is_submitted_by_default(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client);
+        $request = Request::create('/explode', 'GET');
+
+        $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
+        $subscriber->onResponse(new ResponseEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST, new Response('error', 500)));
+        $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('error', 500)));
+
+        self::assertSame('500', $client->attributes['http_status_code']);
+        self::assertSame(1, $client->submitCalls);
+        self::assertSame(0, $client->resetCalls);
+    }
+
+    /**
+     * @param array<string, mixed> $configOverrides
+     */
+    private function makeSubscriber(
+        RecordingPerfbaseClient $client,
+        ?RouterInterface $router = null,
+        array $configOverrides = []
+    ): HttpProfilerSubscriber
+    {
+        $config = array_replace_recursive([
+            'enabled' => true,
+            'sample_rate' => 1.0,
+            'profile_http_status_codes' => array_merge(range(200, 299), range(500, 599)),
+            'include' => ['http' => ['*']],
+            'exclude' => ['http' => []],
+        ], $configOverrides);
+
         return new HttpProfilerSubscriber(
-            [
-                'enabled' => true,
-                'sample_rate' => 1.0,
-                'include' => ['http' => ['*']],
-                'exclude' => ['http' => []],
-            ],
+            $config,
             'test',
             '1.2.3',
             new PerfbaseClientProvider(

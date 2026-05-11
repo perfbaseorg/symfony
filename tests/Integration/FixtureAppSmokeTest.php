@@ -47,7 +47,7 @@ class FixtureAppSmokeTest extends TestCase
 
         $kernel->terminate($request, $response);
 
-        self::assertSame(['http.GET./fixture/articles/{id}'], $client->startedSpans);
+        self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /fixture/articles/{id}', $client->attributes['action']);
         self::assertSame('https://example.test/fixture/articles/123', $client->attributes['http_url']);
         self::assertSame('200', $client->attributes['http_status_code']);
@@ -68,7 +68,7 @@ class FixtureAppSmokeTest extends TestCase
         );
 
         self::assertSame(0, $exitCode);
-        self::assertSame(['console.perfbase:fixture'], $client->startedSpans);
+        self::assertSame(['cli'], $client->startedSpans);
         self::assertSame('perfbase:fixture', $client->attributes['action']);
         self::assertSame('0', $client->attributes['exit_code']);
         self::assertSame(1, $client->submitCalls);

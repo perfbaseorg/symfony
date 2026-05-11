@@ -26,7 +26,7 @@ class AbstractProfilerTest extends TestCase
         $profiler->startProfiling();
         $profiler->stopProfiling();
 
-        self::assertSame(['test.span'], $client->startedSpans);
+        self::assertSame(['test'], $client->startedSpans);
         self::assertArrayHasKey('hostname', $client->attributes);
         self::assertSame('test', $client->attributes['environment']);
         self::assertSame('1.2.3', $client->attributes['app_version']);
@@ -139,6 +139,41 @@ class AbstractProfilerTest extends TestCase
         $profiler->stopProfiling();
 
         self::assertSame(0, $client->submitCalls);
+        self::assertFalse($profiler->hasStarted());
+    }
+
+    public function test_stop_profiling_resets_without_submitting_when_trace_should_be_dropped(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $profiler = new class(
+            $this->makeProvider($client),
+            new PerfbaseErrorHandler(false, false),
+            ['sample_rate' => 1.0]
+        ) extends \Perfbase\Symfony\Profiling\AbstractProfiler {
+            public function __construct(
+                PerfbaseClientProvider $clientProvider,
+                PerfbaseErrorHandler $errorHandler,
+                array $config
+            ) {
+                parent::__construct('test', $clientProvider, $errorHandler, $config, 'test', '1.2.3');
+            }
+
+            protected function shouldProfile(): bool
+            {
+                return true;
+            }
+
+            protected function shouldSubmitTrace(): bool
+            {
+                return false;
+            }
+        };
+
+        $profiler->startProfiling();
+        $profiler->stopProfiling();
+
+        self::assertSame(0, $client->submitCalls);
+        self::assertSame(1, $client->resetCalls);
         self::assertFalse($profiler->hasStarted());
     }
 

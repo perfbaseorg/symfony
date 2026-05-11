@@ -90,6 +90,11 @@ abstract class AbstractProfiler
                 return;
             }
 
+            if (!$this->shouldSubmitTrace()) {
+                $this->client->reset();
+                return;
+            }
+
             $result = $this->client->submitTrace();
 
             if (!$result->isSuccess()) {
@@ -190,4 +195,9 @@ abstract class AbstractProfiler
     }
 
     abstract protected function shouldProfile(): bool;
+
+    protected function shouldSubmitTrace(): bool
+    {
+        return true;
+    }
 }

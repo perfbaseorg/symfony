@@ -2,4 +2,7 @@ perfbase:
   enabled: false
   api_key: '%env(default::PERFBASE_API_KEY)%'
   sample_rate: 0.1
+  # Defaults to successful 2xx responses and server-error 5xx responses.
+  # Add 404 or other codes if you want those traces submitted as well.
+  # profile_http_status_codes: [200, 201, 202, 204, 500, 503, 404]
   app_version: '%env(default::PERFBASE_APP_VERSION)%'

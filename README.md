@@ -107,6 +107,8 @@ perfbase:
   api_key: ''
   api_url: 'https://ingress.perfbase.cloud'
   sample_rate: 0.1
+  # Defaults to every 2xx and 5xx response. Add 404 if you want not-found traces too.
+  # profile_http_status_codes: [200, 201, 202, 204, 500, 503, 404]
   timeout: 10
   proxy: null
   flags: !php/const Perfbase\SDK\FeatureFlags::DefaultFlags
@@ -129,6 +131,7 @@ perfbase:
 | `api_key` | `string` | `''` | Perfbase project API key |
 | `api_url` | `string` | `https://ingress.perfbase.cloud` | Receiver base URL |
 | `sample_rate` | `float` | `0.1` | Sampling rate from `0.0` to `1.0` |
+| `profile_http_status_codes` | `int[]` | `200..299, 500..599` | HTTP response status codes that should be submitted |
 | `timeout` | `int` | `10` | SDK submission timeout in seconds |
 | `proxy` | `string|null` | `null` | Optional outbound proxy URL |
 | `flags` | `int` | `FeatureFlags::DefaultFlags` | Perfbase extension feature flags |
@@ -148,6 +151,7 @@ The bundle validates:
 - `api_url` must be a valid URL
 - `proxy` must be `null` or a valid URL
 - `sample_rate` must be between `0.0` and `1.0`
+- `profile_http_status_codes` entries must be valid HTTP status codes between `100` and `599`
 - `timeout` must be at least `1`
 - `flags` must be non-negative
 - filter entries cannot be empty strings
@@ -170,6 +174,7 @@ perfbase:
   api_key: '%env(PERFBASE_API_KEY)%'
   api_url: 'https://ingress.perfbase.cloud'
   sample_rate: 0.2
+  profile_http_status_codes: [200, 201, 202, 204, 500, 503, 404]
   timeout: 10
   flags: !php/const Perfbase\SDK\FeatureFlags::DefaultFlags
   app_version: '%env(default::PERFBASE_APP_VERSION)%'
@@ -203,6 +208,7 @@ Behavior:
 - main requests only
 - route templates are preferred for stable naming
 - response status codes are attached when available
+- only responses whose status code is in `profile_http_status_codes` are submitted; by default that includes `2xx` and `5xx`
 - exception messages are attached on exception paths
 - trace submission happens during terminate
 

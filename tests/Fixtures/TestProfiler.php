@@ -20,7 +20,7 @@ class TestProfiler extends AbstractProfiler
         PerfbaseErrorHandler $errorHandler,
         array $config
     ) {
-        parent::__construct('test.span', $clientProvider, $errorHandler, $config, 'test', '1.2.3');
+        parent::__construct('test', $clientProvider, $errorHandler, $config, 'test', '1.2.3');
     }
 
     public function setShouldProfile(bool $shouldProfile): void

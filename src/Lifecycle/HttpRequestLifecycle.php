@@ -21,6 +21,7 @@ class HttpRequestLifecycle extends AbstractProfiler
     private ?string $routeName;
     private ?string $controller;
     private ?TokenStorageInterface $tokenStorage;
+    private ?int $responseStatusCode = null;
 
     /**
      * @param array<string, mixed> $config
@@ -55,6 +56,7 @@ class HttpRequestLifecycle extends AbstractProfiler
 
     public function setResponseStatusCode(int $statusCode): void
     {
+        $this->responseStatusCode = $statusCode;
         $this->setAttribute('http_status_code', (string) $statusCode);
     }
 
@@ -91,6 +93,17 @@ class HttpRequestLifecycle extends AbstractProfiler
         if ($userIdentifier !== null && $userIdentifier !== '') {
             $this->setAttribute('user_id', $userIdentifier);
         }
+    }
+
+    protected function shouldSubmitTrace(): bool
+    {
+        if ($this->responseStatusCode === null) {
+            return true;
+        }
+
+        return in_array($this->responseStatusCode, $this->normalizeStatusCodes(
+            $this->config['profile_http_status_codes'] ?? array_merge(range(200, 299), range(500, 599))
+        ), true);
     }
 
     /**
@@ -145,5 +158,31 @@ class HttpRequestLifecycle extends AbstractProfiler
         }
 
         return $user->getUserIdentifier();
+    }
+
+    /**
+     * @param mixed $statusCodes
+     * @return array<int>
+     */
+    private function normalizeStatusCodes($statusCodes): array
+    {
+        if (!is_array($statusCodes)) {
+            return array_merge(range(200, 299), range(500, 599));
+        }
+
+        $normalized = [];
+
+        foreach ($statusCodes as $statusCode) {
+            if (is_int($statusCode)) {
+                $normalized[] = $statusCode;
+                continue;
+            }
+
+            if (is_string($statusCode) && ctype_digit($statusCode)) {
+                $normalized[] = (int) $statusCode;
+            }
+        }
+
+        return array_values(array_unique($normalized));
     }
 }
