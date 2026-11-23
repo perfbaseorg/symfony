@@ -36,6 +36,9 @@ jobs:
           - php-version: '8.5'
             symfony-version: '^5.4'
             prefer-lowest: false
+          - php-version: '8.6'
+            symfony-version: '^5.4'
+            prefer-lowest: false
           - php-version: '8.1'
             symfony-version: '^6.4'
             prefer-lowest: false
@@ -51,6 +54,9 @@ jobs:
           - php-version: '8.5'
             symfony-version: '^6.4'
             prefer-lowest: false
+          - php-version: '8.6'
+            symfony-version: '^6.4'
+            prefer-lowest: false
           - php-version: '8.2'
             symfony-version: '^7.0'
             prefer-lowest: false
@@ -62,6 +68,18 @@ jobs:
             prefer-lowest: false
           - php-version: '8.5'
             symfony-version: '^7.0'
+            prefer-lowest: false
+          - php-version: '8.6'
+            symfony-version: '^7.0'
+            prefer-lowest: false
+          - php-version: '8.4'
+            symfony-version: '^8.0'
+            prefer-lowest: false
+          - php-version: '8.5'
+            symfony-version: '^8.0'
+            prefer-lowest: false
+          - php-version: '8.6'
+            symfony-version: '^8.0'
             prefer-lowest: false
 
     steps:

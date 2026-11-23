@@ -63,7 +63,7 @@ class HttpProfilerSubscriberTest extends TestCase
 
         self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /articles/{id}', $client->attributes['action']);
-        self::assertSame('https://example.com/articles/42', $client->attributes['http_url']);
+        self::assertSame('https://example.com/articles/42?token=REDACTED', $client->attributes['http_url']);
         self::assertSame('202', $client->attributes['http_status_code']);
         self::assertSame(1, $client->submitCalls);
     }

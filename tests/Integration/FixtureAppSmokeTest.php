@@ -49,7 +49,7 @@ class FixtureAppSmokeTest extends TestCase
 
         self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /fixture/articles/{id}', $client->attributes['action']);
-        self::assertSame('https://example.test/fixture/articles/123', $client->attributes['http_url']);
+        self::assertSame('https://example.test/fixture/articles/123?token=REDACTED', $client->attributes['http_url']);
         self::assertSame('200', $client->attributes['http_status_code']);
         self::assertSame(1, $client->submitCalls);
     }

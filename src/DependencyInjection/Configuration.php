@@ -95,9 +95,11 @@ class Configuration implements ConfigurationInterface
                         ->scalarPrototype()->cannotBeEmpty()->end()
                         ->defaultValue([])
                     ->end()
+                    // Long-running workers never finish, so a command-level
+                    // trace would grow until the process exits.
                     ->arrayNode('console')
                         ->scalarPrototype()->cannotBeEmpty()->end()
-                        ->defaultValue([])
+                        ->defaultValue(['messenger:consume'])
                     ->end()
                 ->end()
             ->end();

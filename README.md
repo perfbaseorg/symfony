@@ -13,7 +13,7 @@
   <a href="https://packagist.org/packages/perfbase/symfony"><img src="https://img.shields.io/packagist/v/perfbase/symfony" alt="Packagist Version"></a>
   <a href="https://github.com/perfbaseorg/symfony/blob/main/LICENSE.txt"><img src="https://img.shields.io/packagist/l/perfbase/symfony" alt="License"></a>
   <a href="https://github.com/perfbaseorg/symfony/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/perfbaseorg/symfony/ci.yml?branch=main" alt="CI"></a>
-  <img src="https://img.shields.io/badge/php-7.4--8.5-blue" alt="PHP Version">
+  <img src="https://img.shields.io/badge/php-7.4--8.6-blue" alt="PHP Version">
   <img src="https://img.shields.io/badge/symfony-5.4--7.x-blue" alt="Symfony Version">
 </p>
 
@@ -40,9 +40,9 @@ Out of scope in the current release:
 
 ## Requirements
 
-- PHP `7.4` to `8.5`
-- Symfony `5.4` to `7.x`
-- [`perfbase/php-sdk`](https://packagist.org/packages/perfbase/php-sdk) `^1.0`
+- PHP `7.4` to `8.6`
+- Symfony `5.4` to `8.x`
+- [`perfbase/php-sdk`](https://packagist.org/packages/perfbase/php-sdk) `^1.9`
 - The Perfbase native PHP extension installed and enabled
 
 ## Installation
@@ -118,7 +118,7 @@ perfbase:
     console: ['*']
   exclude:
     http: []
-    console: []
+    console: ['messenger:consume']
 ```
 
 ### Configuration Reference
@@ -139,7 +139,7 @@ perfbase:
 | `include.http` | `string[]` | `['*']` | HTTP allow-list filters |
 | `exclude.http` | `string[]` | `[]` | HTTP deny-list filters |
 | `include.console` | `string[]` | `['*']` | Console allow-list filters |
-| `exclude.console` | `string[]` | `[]` | Console deny-list filters |
+| `exclude.console` | `string[]` | `['messenger:consume']` | Console deny-list filters (long-running workers are excluded by default) |
 
 ### Validation
 
@@ -189,6 +189,7 @@ perfbase:
       - 'GET /health'
       - '/^GET \\/_profiler/'
     console:
+      - 'messenger:consume'   # keep long-running workers excluded when overriding
       - 'cache:clear'
 ```
 
@@ -270,22 +271,27 @@ console.cache:clear
 
 ## URL and Privacy Behavior
 
-The bundle excludes query strings from `http_url`.
+`http_url` keeps the query string, because it often identifies the operation
+(`/api.php?method=example`), but the values of credential-looking parameters are
+replaced with `REDACTED` by the PHP SDK's `UrlSanitizer`: names such as `token`,
+`access_token`, `password`, `api_key`, `signature`, `X-Amz-Signature`, `nonce`,
+`PHPSESSID` and `email`. Symfony normalises the query string, so parameters appear
+sorted by name.
 
 Example:
 
 ```text
-https://example.com/articles/42?token=secret
+https://example.com/api.php?method=example&token=secret
 ```
 
 becomes:
 
 ```text
-https://example.com/articles/42
+https://example.com/api.php?method=example&token=REDACTED
 ```
 
-This is intentional. It avoids leaking signed URLs, nonces, tokens, and other
-high-cardinality values into trace metadata.
+`action` never contains the query string: it uses the route path template
+(`GET /articles/{id}`), so traces stay grouped by route.
 
 ## Filters
 
@@ -321,6 +327,7 @@ perfbase:
       - 'GET /health'
       - '/^GET \\/_profiler/'
     console:
+      - 'messenger:consume'   # keep long-running workers excluded when overriding
       - 'cache:clear'
 ```
 
@@ -389,9 +396,10 @@ The package includes:
 - an install-level fixture app under [`fixture-app/`](fixture-app)
 - GitHub Actions CI for:
   - PHP `7.4` + Symfony `5.4`
-  - PHP `8.0` through `8.5` + Symfony `5.4`
-  - PHP `8.1` through `8.5` + Symfony `6.4`
-  - PHP `8.2` through `8.5` + Symfony `7.x`
+  - PHP `8.0` through `8.6` + Symfony `5.4`
+  - PHP `8.1` through `8.6` + Symfony `6.4`
+  - PHP `8.2` through `8.6` + Symfony `7.x`
+  - PHP `8.4` through `8.6` + Symfony `8.x`
   - fixture-app smoke verification
 
 Current coverage:

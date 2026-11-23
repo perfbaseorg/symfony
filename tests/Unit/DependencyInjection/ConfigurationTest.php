@@ -28,7 +28,7 @@ class ConfigurationTest extends TestCase
         self::assertSame(0.1, $config['sample_rate']);
         self::assertSame(array_merge(range(200, 299), range(500, 599)), $config['profile_http_status_codes']);
         self::assertSame(['*'], $config['include']['http']);
-        self::assertSame([], $config['exclude']['console']);
+        self::assertSame(['messenger:consume'], $config['exclude']['console']);
     }
 
     public function test_configuration_accepts_custom_values(): void

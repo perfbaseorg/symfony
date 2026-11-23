@@ -16,6 +16,32 @@ use Symfony\Component\Security\Core\User\InMemoryUser;
 
 class HttpRequestLifecycleTest extends TestCase
 {
+    public function test_http_url_keeps_operation_parameters_and_redacts_credentials(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $lifecycle = new HttpRequestLifecycle(
+            Request::create('https://example.com/ajax.php?method=example&api_key=abc&page=2', 'GET'),
+            null,
+            null,
+            null,
+            $this->makeProvider($client),
+            new PerfbaseErrorHandler(false, false),
+            $this->config(),
+            'test',
+            '1.2.3',
+            null
+        );
+
+        $lifecycle->startProfiling();
+        $lifecycle->stopProfiling();
+
+        // Symfony normalises the query string (parameters sorted by name).
+        self::assertSame(
+            'https://example.com/ajax.php?api_key=REDACTED&method=example&page=2',
+            $client->attributes['http_url']
+        );
+    }
+
     public function test_start_and_stop_profile_http_request(): void
     {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
@@ -43,7 +69,7 @@ class HttpRequestLifecycleTest extends TestCase
         self::assertSame(['http'], $client->stoppedSpans);
         self::assertSame(1, $client->submitCalls);
         self::assertSame('GET /articles/{id}', $client->attributes['action']);
-        self::assertSame('https://example.com/articles/42', $client->attributes['http_url']);
+        self::assertSame('https://example.com/articles/42?token=REDACTED', $client->attributes['http_url']);
         self::assertSame('201', $client->attributes['http_status_code']);
         self::assertSame('user-123', $client->attributes['user_id']);
         self::assertSame('http', $client->attributes['source']);

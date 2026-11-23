@@ -31,6 +31,25 @@ class Kernel extends BaseKernel
         return dirname(__DIR__);
     }
 
+    /**
+     * One compiled container per environment *and* perfbase config override,
+     * so kernels booted with different overrides never reuse each other's cache.
+     */
+    public function getCacheDir(): string
+    {
+        return $this->getProjectDir() . '/var/cache/' . $this->environment . '-' . $this->configKey();
+    }
+
+    public function getLogDir(): string
+    {
+        return $this->getProjectDir() . '/var/log';
+    }
+
+    private function configKey(): string
+    {
+        return substr(md5(serialize($this->perfbaseConfig)), 0, 12);
+    }
+
     public function registerBundles(): iterable
     {
         $bundles = require $this->getProjectDir() . '/config/bundles.php';

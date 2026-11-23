@@ -59,7 +59,7 @@ class HttpProfilerSubscriberTest extends TestCase
 
         self::assertSame(['http'], $client->startedSpans);
         self::assertSame('GET /raw/path', $client->attributes['action']);
-        self::assertSame('https://example.com/raw/path', $client->attributes['http_url']);
+        self::assertSame('https://example.com/raw/path?secret=REDACTED', $client->attributes['http_url']);
     }
 
     public function test_router_failure_falls_back_gracefully(): void

@@ -10,6 +10,7 @@ use Perfbase\Symfony\Support\PerfbaseClientProvider;
 use Perfbase\Symfony\Support\PerfbaseErrorHandler;
 use Perfbase\Symfony\Support\SpanNaming;
 use Perfbase\SDK\Utils\EnvironmentUtils;
+use Perfbase\SDK\Utils\UrlSanitizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -82,7 +83,7 @@ class HttpRequestLifecycle extends AbstractProfiler
             'source' => 'http',
             'action' => sprintf('%s %s', $this->request->getMethod(), $actionTarget),
             'http_method' => $this->request->getMethod(),
-            'http_url' => $this->request->getSchemeAndHttpHost() . $this->getRequestPath(),
+            'http_url' => $this->resolveHttpUrl(),
             'user_ip' => (string) (EnvironmentUtils::getUserIp() ?? ''),
             'user_agent' => (string) (EnvironmentUtils::getUserUserAgent() ?? ''),
         ];
@@ -131,6 +132,23 @@ class HttpRequestLifecycle extends AbstractProfiler
         }
 
         return array_values(array_unique($components));
+    }
+
+    /**
+     * Full request URL. The query string is kept because it often identifies
+     * the operation (`?method=example`); credential-looking parameter values
+     * are redacted by the SDK.
+     */
+    private function resolveHttpUrl(): string
+    {
+        $url = $this->request->getSchemeAndHttpHost() . $this->getRequestPath();
+        $query = $this->request->getQueryString();
+
+        if ($query !== null && $query !== '') {
+            $url .= '?' . $query;
+        }
+
+        return UrlSanitizer::sanitize($url);
     }
 
     private function getRequestPath(): string

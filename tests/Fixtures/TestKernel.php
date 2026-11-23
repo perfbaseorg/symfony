@@ -39,12 +39,23 @@ class TestKernel extends Kernel
 
     public function getCacheDir(): string
     {
-        return sys_get_temp_dir() . '/perfbase-symfony-cache-' . spl_object_id($this);
+        return sys_get_temp_dir() . '/perfbase-symfony-cache-' . $this->cacheKey();
     }
 
     public function getLogDir(): string
     {
-        return sys_get_temp_dir() . '/perfbase-symfony-log-' . spl_object_id($this);
+        return sys_get_temp_dir() . '/perfbase-symfony-log-' . $this->cacheKey();
+    }
+
+    /**
+     * Kernels built with different perfbase config must never share a compiled
+     * container. spl_object_id() is reused after garbage collection, so it let
+     * a later kernel boot an earlier kernel's cached container and router.
+     * __DIR__ keeps separate checkouts from sharing the temp-dir cache.
+     */
+    private function cacheKey(): string
+    {
+        return md5(__DIR__ . static::class . serialize($this->perfbaseConfig));
     }
 
     protected function configureContainer(ContainerConfigurator $container): void
