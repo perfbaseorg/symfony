@@ -14,7 +14,7 @@
   <a href="https://github.com/perfbaseorg/symfony/blob/main/LICENSE.txt"><img src="https://img.shields.io/packagist/l/perfbase/symfony" alt="License"></a>
   <a href="https://github.com/perfbaseorg/symfony/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/perfbaseorg/symfony/ci.yml?branch=main" alt="CI"></a>
   <img src="https://img.shields.io/badge/php-7.4--8.6-blue" alt="PHP Version">
-  <img src="https://img.shields.io/badge/symfony-5.4--7.x-blue" alt="Symfony Version">
+  <img src="https://img.shields.io/badge/symfony-5.4--8.x-blue" alt="Symfony Version">
 </p>
 
 `perfbase/symfony` is the official Symfony bundle for Perfbase.
@@ -399,7 +399,8 @@ The package includes:
   - PHP `8.0` through `8.6` + Symfony `5.4`
   - PHP `8.1` through `8.6` + Symfony `6.4`
   - PHP `8.2` through `8.6` + Symfony `7.x`
-  - PHP `8.4` through `8.6` + Symfony `8.x`
+  - PHP `8.4` through `8.6` + Symfony `8.x` (including the lowest `8.0` release, on PHP `8.4`)
+  - PHP `8.4` and `8.6` + the upcoming Symfony `8.2` pre-release (allowed to fail)
   - fixture-app smoke verification
 
 Current coverage:

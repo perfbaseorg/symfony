@@ -78,12 +78,30 @@ jobs:
           - php-version: '8.4'
             symfony-version: '^8.0'
             prefer-lowest: false
+          # ^8.0 follows the newest 8.x release; these two keep 8.0 and 8.1 covered.
           - php-version: '8.5'
-            symfony-version: '^8.0'
+            symfony-version: '~8.0.0'
+            prefer-lowest: false
+          - php-version: '8.5'
+            symfony-version: '^8.1'
             prefer-lowest: false
           - php-version: '8.6'
-            symfony-version: '^8.0'
+            symfony-version: '^8.1'
             prefer-lowest: false
+          # Upcoming release: watched, but allowed to fail.
+          - php-version: '8.4'
+            symfony-version: '8.2.*@beta'
+            prefer-lowest: false
+            minimum-stability: beta
+            experimental: true
+          - php-version: '8.6'
+            symfony-version: '8.2.*@beta'
+            prefer-lowest: false
+            minimum-stability: beta
+            experimental: true
+
+    # Pre-release rows must not block stable releases from going green.
+    continue-on-error: ${{ matrix.experimental || false }}
 
     steps:
       - name: Checkout code
@@ -97,6 +115,10 @@ jobs:
 
       - name: Install Perfbase extension
         run: bash -c "$(curl -fsSL https://cdn.perfbase.com/install.sh)"
+
+      - name: Allow pre-releases
+        if: matrix.minimum-stability != ''
+        run: composer config minimum-stability ${{ matrix.minimum-stability }}
 
       - name: Pin Symfony version
         run: composer require --no-update symfony/config:${{ matrix.symfony-version }} symfony/console:${{ matrix.symfony-version }} symfony/dependency-injection:${{ matrix.symfony-version }} symfony/event-dispatcher:${{ matrix.symfony-version }} symfony/framework-bundle:${{ matrix.symfony-version }} symfony/http-kernel:${{ matrix.symfony-version }} symfony/routing:${{ matrix.symfony-version }} symfony/security-core:${{ matrix.symfony-version }}
