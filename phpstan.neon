@@ -10,3 +10,5 @@ parameters:
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\)#'
         - '#Cannot call method .+Node\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null#'
         - '#Cannot call method defaultValue\(\) on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null#'
+        # Symfony 8.0.0 declares TreeBuilder as generic; later 8.x releases do not.
+        - '#TreeBuilder does not specify its types#'

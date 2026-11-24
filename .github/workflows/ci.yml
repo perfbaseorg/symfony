@@ -74,6 +74,9 @@ jobs:
             prefer-lowest: false
           - php-version: '8.4'
             symfony-version: '^8.0'
+            prefer-lowest: true
+          - php-version: '8.4'
+            symfony-version: '^8.0'
             prefer-lowest: false
           - php-version: '8.5'
             symfony-version: '^8.0'
