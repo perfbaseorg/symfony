@@ -90,6 +90,50 @@ class ConsoleProfilerSubscriberTest extends TestCase
         self::assertSame(0, $client->submitCalls);
     }
 
+    public function test_nested_command_does_not_take_over_the_parents_span(): void
+    {
+        // A command that runs another command with a fresh input starts a
+        // second lifecycle while the first is still profiling. Both use the
+        // "cli" span, and the SDK refuses to start a span that is already
+        // active, so only the outermost command may own it.
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client);
+        $output = new BufferedOutput();
+        $outer = new Command('app:outer');
+        $inner = new Command('app:inner');
+        $outerInput = new ArrayInput([]);
+        $innerInput = new ArrayInput([]);
+
+        $subscriber->onCommand(new ConsoleCommandEvent($outer, $outerInput, $output));
+        $subscriber->onCommand(new ConsoleCommandEvent($inner, $innerInput, $output));
+        $subscriber->onTerminate(new ConsoleTerminateEvent($inner, $innerInput, $output, 0));
+        $subscriber->onTerminate(new ConsoleTerminateEvent($outer, $outerInput, $output, 0));
+
+        self::assertSame(['cli'], $client->startedSpans);
+        self::assertSame(['cli'], $client->stoppedSpans);
+        self::assertSame(1, $client->submitCalls);
+        self::assertSame('app:outer', $client->attributes['action'] ?? null);
+    }
+
+    public function test_span_is_released_when_a_lifecycle_finishes(): void
+    {
+        // Lifecycles run one after the other on the same client must each
+        // get the span.
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client);
+        $input = new ArrayInput([]);
+        $output = new BufferedOutput();
+        $command = new Command('app:sync');
+
+        $subscriber->onCommand(new ConsoleCommandEvent($command, $input, $output));
+        $subscriber->onTerminate(new ConsoleTerminateEvent($command, $input, $output, 0));
+        $subscriber->onCommand(new ConsoleCommandEvent($command, $input, $output));
+        $subscriber->onTerminate(new ConsoleTerminateEvent($command, $input, $output, 0));
+
+        self::assertSame(['cli', 'cli'], $client->startedSpans);
+        self::assertSame(2, $client->submitCalls);
+    }
+
     private function makeSubscriber(RecordingPerfbaseClient $client, bool $enabled = true): ConsoleProfilerSubscriber
     {
         return new ConsoleProfilerSubscriber(

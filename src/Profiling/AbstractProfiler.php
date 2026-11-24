@@ -28,6 +28,18 @@ abstract class AbstractProfiler
     private bool $started = false;
 
     /**
+     * Span names currently owned by a profiling lifecycle, per process,
+     * mapped to the client that started them.
+     *
+     * Lifecycles of the same kind share one span name ("http", "cli"), so a
+     * nested one (a command running another command) must not touch the span
+     * its parent already owns: the SDK rejects the second start, and the
+     * nested lifecycle would otherwise stop and submit the parent's trace.
+     * @var array<string, Perfbase>
+     */
+    private static array $spanOwners = [];
+
+    /**
      * @param array<string, mixed> $config
      */
     public function __construct(
@@ -58,6 +70,10 @@ abstract class AbstractProfiler
                 return;
             }
 
+            if (isset(self::$spanOwners[$this->spanName]) && self::$spanOwners[$this->spanName] === $this->client) {
+                return;
+            }
+
             if (!$this->passesSampleRateCheck() || !$this->shouldProfile()) {
                 return;
             }
@@ -67,11 +83,20 @@ abstract class AbstractProfiler
             }
 
             $this->client->startTraceSpan($this->spanName);
+            self::$spanOwners[$this->spanName] = $this->client;
             $this->setDefaultAttributes();
             $this->started = true;
         } catch (\Throwable $throwable) {
             $this->started = false;
+            self::releaseSpan($this->spanName, $this->client);
             $this->errorHandler->handle($throwable, 'start_profiling');
+        }
+    }
+
+    private static function releaseSpan(string $spanName, ?Perfbase $client): void
+    {
+        if ($client !== null && isset(self::$spanOwners[$spanName]) && self::$spanOwners[$spanName] === $client) {
+            unset(self::$spanOwners[$spanName]);
         }
     }
 
@@ -111,6 +136,7 @@ abstract class AbstractProfiler
             $this->errorHandler->handle($throwable, 'stop_profiling');
         } finally {
             $this->started = false;
+            self::releaseSpan($this->spanName, $this->client);
         }
     }
 
