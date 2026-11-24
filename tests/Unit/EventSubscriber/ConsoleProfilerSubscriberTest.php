@@ -70,11 +70,31 @@ class ConsoleProfilerSubscriberTest extends TestCase
         self::assertSame(1, $client->submitCalls);
     }
 
-    private function makeSubscriber(RecordingPerfbaseClient $client): ConsoleProfilerSubscriber
+    public function test_disabled_profiling_does_not_track_or_start_command(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $subscriber = $this->makeSubscriber($client, false);
+        $input = new ArrayInput([]);
+        $output = new BufferedOutput();
+        $command = new Command('app:sync');
+
+        $subscriber->onCommand(new ConsoleCommandEvent($command, $input, $output));
+
+        $lifecycles = new \ReflectionProperty(ConsoleProfilerSubscriber::class, 'lifecycles');
+        $lifecycles->setAccessible(true);
+        self::assertSame([], $lifecycles->getValue($subscriber));
+
+        $subscriber->onTerminate(new ConsoleTerminateEvent($command, $input, $output, 0));
+
+        self::assertSame([], $client->startedSpans);
+        self::assertSame(0, $client->submitCalls);
+    }
+
+    private function makeSubscriber(RecordingPerfbaseClient $client, bool $enabled = true): ConsoleProfilerSubscriber
     {
         return new ConsoleProfilerSubscriber(
             [
-                'enabled' => true,
+                'enabled' => $enabled,
                 'sample_rate' => 1.0,
                 'include' => ['console' => ['*']],
                 'exclude' => ['console' => []],

@@ -62,6 +62,24 @@ class HttpProfilerSubscriberTest extends TestCase
         self::assertSame('https://example.com/raw/path?secret=REDACTED', $client->attributes['http_url']);
     }
 
+    public function test_disabled_profiling_skips_route_resolution_and_lifecycle(): void
+    {
+        $client = new RecordingPerfbaseClient();
+        $router = $this->createMock(RouterInterface::class);
+        $router->expects(self::never())->method('getRouteCollection');
+
+        $subscriber = $this->makeSubscriber($client, $router, ['enabled' => false]);
+        $request = Request::create('/articles/99', 'GET');
+        $request->attributes->set('_route', 'app_article');
+
+        $subscriber->onRequest(new RequestEvent($this->makeKernel(), $request, HttpKernelInterface::MAIN_REQUEST));
+        $subscriber->onTerminate(new TerminateEvent($this->makeKernel(), $request, new Response('ok', 200)));
+
+        self::assertFalse($request->attributes->has('_perfbase_http_lifecycle'));
+        self::assertSame([], $client->startedSpans);
+        self::assertSame(0, $client->submitCalls);
+    }
+
     public function test_router_failure_falls_back_gracefully(): void
     {
         $client = new RecordingPerfbaseClient();
