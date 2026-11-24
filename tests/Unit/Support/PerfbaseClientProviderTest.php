@@ -18,7 +18,11 @@ class PerfbaseClientProviderTest extends TestCase
     {
         $reflection = new \ReflectionClass($config);
         $property = $reflection->getProperty($propertyName);
-        $property->setAccessible(true);
+
+        // A no-op since PHP 8.1 and deprecated since 8.5; needed for 7.4 and 8.0.
+        if (PHP_VERSION_ID < 80100) {
+            $property->setAccessible(true);
+        }
 
         return $property->getValue($config);
     }

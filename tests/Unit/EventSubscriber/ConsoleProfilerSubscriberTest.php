@@ -81,7 +81,12 @@ class ConsoleProfilerSubscriberTest extends TestCase
         $subscriber->onCommand(new ConsoleCommandEvent($command, $input, $output));
 
         $lifecycles = new \ReflectionProperty(ConsoleProfilerSubscriber::class, 'lifecycles');
-        $lifecycles->setAccessible(true);
+
+        // A no-op since PHP 8.1 and deprecated since 8.5; needed for 7.4 and 8.0.
+        if (PHP_VERSION_ID < 80100) {
+            $lifecycles->setAccessible(true);
+        }
+
         self::assertSame([], $lifecycles->getValue($subscriber));
 
         $subscriber->onTerminate(new ConsoleTerminateEvent($command, $input, $output, 0));
