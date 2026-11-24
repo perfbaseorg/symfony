@@ -72,6 +72,12 @@ class HttpProfilerSubscriber implements EventSubscriberInterface
             return;
         }
 
+        // Bail before resolving the route template: that loads the full route
+        // collection, which is expensive and pointless when profiling is off.
+        if (!$this->isEnabled()) {
+            return;
+        }
+
         try {
             $request = $event->getRequest();
             $lifecycle = new HttpRequestLifecycle(
@@ -147,6 +153,11 @@ class HttpProfilerSubscriber implements EventSubscriberInterface
         } catch (\Throwable $throwable) {
             $this->errorHandler->handle($throwable, 'http_terminate');
         }
+    }
+
+    private function isEnabled(): bool
+    {
+        return (bool) ($this->config['enabled'] ?? false);
     }
 
     private function getLifecycle(Request $request): ?HttpRequestLifecycle

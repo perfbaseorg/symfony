@@ -58,6 +58,10 @@ class ConsoleProfilerSubscriber implements EventSubscriberInterface
 
     public function onCommand(ConsoleCommandEvent $event): void
     {
+        if (!(bool) ($this->config['enabled'] ?? false)) {
+            return;
+        }
+
         $command = $event->getCommand();
         if ($command === null) {
             return;
