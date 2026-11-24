@@ -8,7 +8,6 @@ use Perfbase\Symfony\DependencyInjection\Configuration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class ConfigurationTest extends TestCase
 {
@@ -16,7 +15,7 @@ class ConfigurationTest extends TestCase
     {
         $configuration = new Configuration();
 
-        self::assertInstanceOf(TreeBuilder::class, $configuration->getConfigTreeBuilder());
+        self::assertSame('perfbase', $configuration->getConfigTreeBuilder()->buildTree()->getName());
     }
 
     public function test_configuration_defaults_are_applied(): void
