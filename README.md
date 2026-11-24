@@ -399,7 +399,7 @@ The package includes:
   - PHP `8.0` through `8.6` + Symfony `5.4`
   - PHP `8.1` through `8.6` + Symfony `6.4`
   - PHP `8.2` through `8.6` + Symfony `7.x`
-  - PHP `8.4` through `8.6` + Symfony `8.x` (including the lowest `8.0` release, on PHP `8.4`)
+  - PHP `8.4` through `8.6` + Symfony `8.x` (on PHP `8.4` also against the lowest `8.0` release, which carries an unpatched advisory)
   - PHP `8.4` and `8.6` + the upcoming Symfony `8.2` pre-release (allowed to fail)
   - fixture-app smoke verification
 

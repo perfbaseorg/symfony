@@ -75,13 +75,15 @@ jobs:
           - php-version: '8.4'
             symfony-version: '^8.0'
             prefer-lowest: true
+            # Every 8.0.x release carries an unpatched advisory; allow it so
+            # the minimum the ^8.0 constraint accepts is still exercised.
+            allow-advisories: true
           - php-version: '8.4'
             symfony-version: '^8.0'
             prefer-lowest: false
-          # ^8.0 follows the newest 8.x release; these two keep 8.0 and 8.1 covered.
-          - php-version: '8.5'
-            symfony-version: '~8.0.0'
-            prefer-lowest: false
+          # ^8.0 follows the newest 8.x release; these two keep 8.1 covered.
+          # No row pins 8.0.x: every release has an unpatched advisory, which
+          # Composer's advisory policy refuses to install.
           - php-version: '8.5'
             symfony-version: '^8.1'
             prefer-lowest: false
@@ -124,6 +126,8 @@ jobs:
         run: composer require --no-update symfony/config:${{ matrix.symfony-version }} symfony/console:${{ matrix.symfony-version }} symfony/dependency-injection:${{ matrix.symfony-version }} symfony/event-dispatcher:${{ matrix.symfony-version }} symfony/framework-bundle:${{ matrix.symfony-version }} symfony/http-kernel:${{ matrix.symfony-version }} symfony/routing:${{ matrix.symfony-version }} symfony/security-core:${{ matrix.symfony-version }}
 
       - name: Install dependencies
+        env:
+          COMPOSER_POLICY_ADVISORIES_BLOCK: ${{ matrix.allow-advisories && '0' || '1' }}
         run: composer update --with-all-dependencies --prefer-dist --no-progress ${{ matrix.prefer-lowest && '--prefer-lowest' || '' }}
 
       - name: Run PHPStan
